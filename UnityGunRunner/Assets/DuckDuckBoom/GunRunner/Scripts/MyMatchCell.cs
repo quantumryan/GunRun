@@ -33,10 +33,43 @@ namespace DuckDuckBoom.GunRunner.Game
         public MyIconTileSet tileSet;
 
         public SpriteRenderer tileSprite;
+        public SpriteRenderer selectedSprite;
         public SpriteRenderer stackSprite;
         public SpriteRenderer stackNumberSprite;
         //frozen
         //etc
+
+
+        private bool isSelectable;
+        public bool IsSelectable
+        {
+            get { return isSelectable; }
+
+            set
+            {
+                isSelectable = value;
+                UpdatePresentation();
+            }
+        }
+
+        private bool isSelected;
+        public bool IsSelected
+        {
+            get { return isSelected; }
+
+            set
+            {
+                isSelected = value;
+                UpdatePresentation();
+            }
+        }
+
+        
+		public void Awake()
+        {
+            isSelectable = true;
+            isSelected = false;
+		}
 
         [SerializeField]
         private TileType tileType;
@@ -47,7 +80,28 @@ namespace DuckDuckBoom.GunRunner.Game
             set
             {
                 tileType = value;
-                //FrameIndex = (int)value; //do logic better here
+
+                switch (tileType)
+                {
+                    case TileType.Money:
+                        tileSprite.sprite = tileSet.moneySprites.RandomItem();
+                        break;
+                    case TileType.Gun:
+                        tileSprite.sprite = tileSet.gunSprites.RandomItem();
+                        break;
+                    case TileType.Fuel:
+                        tileSprite.sprite = tileSet.fuelSprites.RandomItem();
+                        break;
+                    case TileType.Army1:
+                        tileSprite.sprite = tileSet.army1Sprites.RandomItem();
+                        break;
+                    case TileType.Army2:
+                        tileSprite.sprite = tileSet.army2Sprites.RandomItem();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException("tileType");
+                }
+                //do tile logic better here
                 UpdatePresentation(); //Update presentation to display new state.
             }
         }
@@ -93,32 +147,15 @@ namespace DuckDuckBoom.GunRunner.Game
             }
         }
 
+        public void AddToStack(int add)
+        {
+            StackValue += add;
+        }
+
 
         private void UpdatePresentation()
         {
             //logic to change cells appearance based on states
-
-            switch (tileType)
-            {
-                case TileType.Money:
-                    tileSprite.sprite = tileSet.moneySprites.RandomItem();
-                    break;
-                case TileType.Gun:
-                    tileSprite.sprite = tileSet.gunSprites.RandomItem();
-                    break;
-                case TileType.Fuel:
-                    tileSprite.sprite = tileSet.fuelSprites.RandomItem();
-                    break;
-                case TileType.Army1:
-                    tileSprite.sprite = tileSet.army1Sprites.RandomItem();
-                    break;
-                case TileType.Army2:
-                    tileSprite.sprite = tileSet.army2Sprites.RandomItem();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("tileType");
-            }
-
             if(stackValue > 1)
             {
                 stackSprite.gameObject.SetActive(true);
@@ -128,7 +165,12 @@ namespace DuckDuckBoom.GunRunner.Game
             {
                 stackSprite.gameObject.SetActive(false);
             }
+
+            tileSprite.color = isSelectable ?  Color.white : Color.Lerp(Color.white, Color.black, 0.8f);
+
+            selectedSprite.enabled = isSelected ? true : false;
         }
+
 
     }
 

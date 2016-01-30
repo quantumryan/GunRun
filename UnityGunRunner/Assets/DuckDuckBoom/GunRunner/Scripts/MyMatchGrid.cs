@@ -9,10 +9,20 @@ namespace DuckDuckBoom.GunRunner.Game
     public class MyMatchGrid : GridBehaviour<RectPoint>
     {
         public float animationTimePerCell = .1f;
-
         public bool useAcceleration = false;
 
+        private bool isDrag = false;
         private RectGrid<MyMatchCell> myMatchGrid;
+
+        private MyMatchCell lastCellSelected;
+        private RectPoint lastCellPoint;
+        //private HashSet<RectPoint> selectedSet;
+        private HashSet<RectPoint> selectedSet;
+
+        void Start()
+        {
+            selectedSet = new HashSet<RectPoint>();
+        }
 
         public override void InitGrid()
         {
@@ -28,6 +38,57 @@ namespace DuckDuckBoom.GunRunner.Game
             cell.IsMoving = false;
         }
 
+        void Update()
+        {
+            if(isDrag && myMatchGrid.Contains(MousePosition))
+            {
+                var mouseOverCell = myMatchGrid[MousePosition];
+                if(mouseOverCell.IsSelectable)
+                {
+                    var neighbors = myMatchGrid.GetNeighbors(lastCellPoint).ToPointList();
+                    if(neighbors.Contains(MousePosition))
+                    {
+                        mouseOverCell.IsSelectable = false;
+                        mouseOverCell.IsSelected = true;
+                        lastCellSelected = mouseOverCell;
+                        lastCellPoint = MousePosition;
+
+                        selectedSet.Add(lastCellPoint);
+                    }
+                }
+            }
+            
+            if (Input.GetMouseButtonUp(0)) DoneDrag();
+        }
+
+        // clear match tiles & sort tile grid when dragged
+        void DoneDrag()
+        {
+            
+            isDrag = false;
+
+
+            //unset all
+            foreach (var point in myMatchGrid)
+            {
+                myMatchGrid[point].IsSelectable = true;
+            }
+
+            DestroyMatchedCells(selectedSet);
+
+            IGrid<int, RectPoint> emptyCellsBelowCount = CountEmptyCellsBelowEachCell();
+            StartMovingCells(emptyCellsBelowCount);
+
+            int[] emptyCellsBelowTopCount = CountEmptyCellsBelowTop();
+            MakeNewCellsAndStartMovingThem(emptyCellsBelowTopCount);
+
+
+            lastCellSelected = null;
+            selectedSet.Clear();
+
+        }
+
+
         public void OnClick(RectPoint clickedPoint)
         {
             if (myMatchGrid.Values.Any(c => c == null || c.IsMoving)) //If any cell is moving, ignore input
@@ -35,27 +96,43 @@ namespace DuckDuckBoom.GunRunner.Game
                 return;
             }
 
-            var connectedSet = Algorithms.GetConnectedSet(
-                myMatchGrid,
-                clickedPoint,
-                CheckMatch);
+            //var connectedSet = Algorithms.GetConnectedSet(
+            //    myMatchGrid,
+            //    clickedPoint,
+            //    CheckMatch);
 
-            if (connectedSet.Count < 3)
-            {
-                return; // nothing more to do
-            }
+            //if (connectedSet.Count < 3)
+            //{
+            //    return; // nothing more to do
+            //}
 
-            //HighlightMatchedCells(connectedSet);
+            isDrag = true;
 
+            MyMatchCell selectedCell = myMatchGrid[clickedPoint];
 
+            //first cell selction happening
             foreach (var point in myMatchGrid)
             {
-                if (CheckMatch(clickedPoint, point))
+                var MyMatchCell = myMatchGrid[point];
+                if (!CheckMatch(clickedPoint, point))
                 {
-                    var MyMatchCell = myMatchGrid[point];
-                    MyMatchCell.HighlightOn = !MyMatchCell.HighlightOn;
+                    MyMatchCell.IsSelectable = false;
+                }
+                else
+                {
+                    MyMatchCell.IsSelectable = true;
                 }
             }
+            lastCellSelected = selectedCell;
+            lastCellPoint = clickedPoint;
+
+            lastCellSelected.IsSelected = true;
+            lastCellSelected.IsSelectable = false;
+
+            selectedSet.Add(lastCellPoint);
+
+
+
 
             //DestroyMatchedCells(connectedSet);
 
@@ -75,19 +152,6 @@ namespace DuckDuckBoom.GunRunner.Game
         }
 
 
-        //ryans
-        private void HighlightMatchedCells(IEnumerable<RectPoint> connectedSet)
-        {
-            foreach (var rectPoint in connectedSet)
-            {
-                var MyMatchCell = myMatchGrid[rectPoint];
-
-                if (MyMatchCell != null)
-                {
-                    MyMatchCell.HighlightOn = !MyMatchCell.HighlightOn;
-                }
-            }
-        }
 
         private void DestroyMatchedCells(IEnumerable<RectPoint> connectedSet)
         {
