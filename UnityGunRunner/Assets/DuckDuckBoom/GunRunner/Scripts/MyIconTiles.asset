@@ -27,4 +27,14 @@ MonoBehaviour:
   - {fileID: 21300016, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
   - {fileID: 21300018, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
   - {fileID: 21300020, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
-  numberSprites: []
+  numberSprites:
+  - {fileID: 21300052, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300056, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300058, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300060, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300062, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300068, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300070, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300072, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300074, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300086, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}

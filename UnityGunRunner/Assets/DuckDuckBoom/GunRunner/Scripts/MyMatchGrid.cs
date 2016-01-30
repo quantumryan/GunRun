@@ -63,16 +63,24 @@ namespace DuckDuckBoom.GunRunner.Game
 
         // clear match tiles & sort tile grid when dragged
         void DoneDrag()
-        {
-            
+        {            
             isDrag = false;
-
 
             //unset all
             foreach (var point in myMatchGrid)
             {
                 myMatchGrid[point].IsSelectable = true;
+                myMatchGrid[point].IsSelected = false;
             }
+
+            int countStack = 0;
+            foreach(RectPoint rp in selectedSet)
+            {
+                countStack += myMatchGrid[rp].StackValue;
+            }
+            selectedSet.Remove(lastCellPoint);
+            Debug.Log(lastCellSelected.gameObject.name + " adding stack value " + countStack);
+            lastCellSelected.AddToStack(countStack);
 
             DestroyMatchedCells(selectedSet);
 
@@ -82,10 +90,7 @@ namespace DuckDuckBoom.GunRunner.Game
             int[] emptyCellsBelowTopCount = CountEmptyCellsBelowTop();
             MakeNewCellsAndStartMovingThem(emptyCellsBelowTopCount);
 
-
-            lastCellSelected = null;
             selectedSet.Clear();
-
         }
 
 

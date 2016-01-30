@@ -35,7 +35,7 @@ namespace DuckDuckBoom.GunRunner.Game
         public SpriteRenderer tileSprite;
         public SpriteRenderer selectedSprite;
         public SpriteRenderer stackSprite;
-        public SpriteRenderer stackNumberSprite;
+        public SpriteRenderer[] stackNumberSprites;
         //frozen
         //etc
 
@@ -112,7 +112,7 @@ namespace DuckDuckBoom.GunRunner.Game
         //Keep states private
         private bool isFrozen;
         private bool isDiseased;
-        private int stackValue;
+        private int stackValue = 1;
 
         //Provide public properties to change the state
         public bool IsFrozen
@@ -149,7 +149,8 @@ namespace DuckDuckBoom.GunRunner.Game
 
         public void AddToStack(int add)
         {
-            StackValue += add;
+            StackValue = StackValue + add;
+            UpdatePresentation();
         }
 
 
@@ -160,6 +161,21 @@ namespace DuckDuckBoom.GunRunner.Game
             {
                 stackSprite.gameObject.SetActive(true);
                 //set stack number
+                if(stackValue > 9)
+                {
+                    stackNumberSprites[0].enabled = false;
+                    stackNumberSprites[1].enabled = true;
+                    stackNumberSprites[2].enabled = true;
+                    stackNumberSprites[1].sprite = tileSet.numberSprites[stackValue / 10];
+                    stackNumberSprites[2].sprite = tileSet.numberSprites[stackValue % 10];
+                }
+                else
+                {
+                    stackNumberSprites[0].enabled = true;
+                    stackNumberSprites[0].sprite = tileSet.numberSprites[stackValue];
+                    stackNumberSprites[1].enabled = false;
+                    stackNumberSprites[2].enabled = false;
+                }
             }
             else
             {
