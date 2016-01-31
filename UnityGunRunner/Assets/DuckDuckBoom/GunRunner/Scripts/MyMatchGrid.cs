@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Gamelogic.Grids;
+using UnityEngine.UI;
 
 namespace DuckDuckBoom.GunRunner.Game
 {
@@ -24,6 +26,9 @@ namespace DuckDuckBoom.GunRunner.Game
 		private HashSet<RectPoint> selectedSet;
 
 		private HashSet<TileType> selectedTileTypes;
+
+
+		public Text debugTextUI;
 
 		void Start()
 		{
@@ -63,7 +68,10 @@ namespace DuckDuckBoom.GunRunner.Game
 						selectedSet.Add(lastCellPoint);
 						selectedTileTypes.Add(lastCellSelected.TileType);
 
-						DetermineValidMatchTypes();
+						//what are the valid selection types
+						DetermineValidTileTypesForMatching();
+
+						//DetermineValidMatchTypes();
 					}
 				}
 			}
@@ -71,26 +79,108 @@ namespace DuckDuckBoom.GunRunner.Game
 			if (Input.GetMouseButtonUp(0)) DoneDrag();
 		}
 
-		void DetermineValidMatchTypes()
+
+		void DetermineValidTileTypesForMatching()
 		{
+			HashSet<TileType> validTileTypesForSelection = new HashSet<TileType>();
+
+			if (selectedTileTypes.Count > 1)
+			{
+				validTileTypesForSelection = selectedTileTypes;
+			}
+			else
+			{
+				validTileTypesForSelection.Add(TileType.Money);
+				validTileTypesForSelection.Add(TileType.Gun);
+				validTileTypesForSelection.Add(TileType.Fuel);
+				validTileTypesForSelection.Add(TileType.Army1);
+				validTileTypesForSelection.Add(TileType.Army2);
+				switch (selectedTileTypes.ElementAt(0))
+				{
+					case TileType.Money:
+						validTileTypesForSelection.Remove(TileType.Army1);
+						validTileTypesForSelection.Remove(TileType.Army2);
+						break;
+					case TileType.Gun:
+						validTileTypesForSelection.Remove(TileType.Fuel);
+						break;
+					case TileType.Fuel:
+						validTileTypesForSelection.Remove(TileType.Gun);
+						validTileTypesForSelection.Remove(TileType.Army1);
+						validTileTypesForSelection.Remove(TileType.Army2);
+						break;
+					case TileType.Army1:
+						validTileTypesForSelection.Remove(TileType.Money);
+						validTileTypesForSelection.Remove(TileType.Fuel);
+						break;
+					case TileType.Army2:
+						validTileTypesForSelection.Remove(TileType.Money);
+						validTileTypesForSelection.Remove(TileType.Fuel);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException("tileType");
+				}
+			}
+
 			foreach (var point in myMatchGrid)
 			{
-				var MyMatchCell = myMatchGrid[point];
-				if (!CheckMatch(MousePosition, point))
+				myMatchGrid[point].IsSelectable = false;
+				foreach (TileType tt in validTileTypesForSelection)
 				{
-					MyMatchCell.IsSelectable = false;
+					if (myMatchGrid[point].TileType == tt && !myMatchGrid[point].IsSelected)
+					{
+						myMatchGrid[point].IsSelectable = true;
+					}
 				}
-				else
+			}
+
+
+
+			debugTextUI.text += "DetermineValidTileTypesForMatching\n\n";
+			debugTextUI.text += "    selectedTileTypes\n";
+			foreach (TileType tt in selectedTileTypes)
+			{
+				debugTextUI.text += tt.ToString() + "\n";
+			}
+
+			debugTextUI.text += "    validTileTypesForSelection TileTypes\n";
+			if (validTileTypesForSelection.Count < 1)
+			{
+				debugTextUI.text += "None";
+			}
+			else
+			{
+				foreach (TileType tt in validTileTypesForSelection)
 				{
-					MyMatchCell.IsSelectable = true;
+					debugTextUI.text += tt.ToString() + "\n";
 				}
 			}
 		}
+
+
+		//void DetermineValidMatchTypes()
+		//{
+		//	foreach (var point in myMatchGrid)
+		//	{
+		//		var MyMatchCell = myMatchGrid[point];
+		//		//if (!CheckMatch(MousePosition, point))
+		//		if (CheckSelectableTleType(point))
+		//		{
+		//			MyMatchCell.IsSelectable = false;
+		//		}
+		//		else
+		//		{
+		//			MyMatchCell.IsSelectable = true;
+		//		}
+		//	}
+		//}
 
 		// clear match tiles & sort tile grid when dragged
 		void DoneDrag()
 		{
 			isDrag = false;
+
+			debugTextUI.text = "";
 
 			if (lastCellSelected != null)
 			{
@@ -139,7 +229,6 @@ namespace DuckDuckBoom.GunRunner.Game
 
 				selectedSet.Clear();
 				selectedTileTypes.Clear();
-
 				lastCellSelected = null;
 			}
 		}
@@ -155,7 +244,7 @@ namespace DuckDuckBoom.GunRunner.Game
 			isDrag = true;
 		}
 
-
+		//original
 		private bool CheckMatch(RectPoint p, RectPoint q)
 		{
 			if (myMatchGrid[p] == null) return false;
@@ -163,6 +252,21 @@ namespace DuckDuckBoom.GunRunner.Game
 
 			return myMatchGrid[p].TileType == myMatchGrid[q].TileType;
 		}
+
+
+		//private bool CheckSelectableTleType(RectPoint p)
+		//{
+		//	if (myMatchGrid[p] == null) return false;
+			
+		//	foreach(TileType tt in validTileTypesForSelection)
+		//	{
+		//		if (myMatchGrid[p].TileType == tt)
+		//		{
+		//			return true;
+		//		}
+		//	}
+		//	return false;
+		//}
 
 
 
