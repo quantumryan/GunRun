@@ -1,0 +1,78 @@
+fileFormatVersion: 2
+guid: 70098dbe27a449441b44fd53599ac13c
+timeCreated: 1454238945
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: SliderTag_0
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: 2
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 2
+  spritePivot: {x: 0.5, y: 1}
+  spriteBorder: {x: 25, y: 25, z: 25, w: 145}
+  spritePixelsToUnits: 500
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: SliderTag_0
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 12
+        width: 220
+        height: 158
+      alignment: 2
+      pivot: {x: 0.5, y: 1}
+      border: {x: 17, y: 17, z: 17, w: 57}
+      outline:
+      - - {x: 0, y: 0}
+        - {x: -6, y: 0}
+        - {x: -9, y: -8}
+        - {x: -109, y: -38}
+        - {x: -110, y: -44}
+        - {x: -110, y: -158}
+        - {x: 110, y: -158}
+        - {x: 110, y: -48}
+        - {x: 19, y: -40}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

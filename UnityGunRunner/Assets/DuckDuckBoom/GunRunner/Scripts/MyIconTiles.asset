@@ -12,21 +12,29 @@ MonoBehaviour:
   m_Name: MyIconTiles
   m_EditorClassIdentifier: 
   moneySprites:
-  - {fileID: 21300000, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300000, guid: e132414d77e646947ac602a3801caa1e, type: 3}
   gunSprites:
-  - {fileID: 21300002, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
-  - {fileID: 21300004, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
-  - {fileID: 21300006, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300000, guid: e0e4c189ecbff804fa9926794b1a72bb, type: 3}
+  - {fileID: 21300002, guid: e0e4c189ecbff804fa9926794b1a72bb, type: 3}
+  - {fileID: 21300004, guid: e0e4c189ecbff804fa9926794b1a72bb, type: 3}
   fuelSprites:
-  - {fileID: 21300008, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300000, guid: c6d9a8748a9a922418cc161e7da6ebaa, type: 3}
   army1Sprites:
-  - {fileID: 21300024, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
-  - {fileID: 21300026, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
-  - {fileID: 21300030, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300000, guid: 610e7c37e6bca3440bdd880c3dd0aead, type: 3}
+  - {fileID: 21300002, guid: 610e7c37e6bca3440bdd880c3dd0aead, type: 3}
+  - {fileID: 21300004, guid: 610e7c37e6bca3440bdd880c3dd0aead, type: 3}
+  - {fileID: 21300006, guid: 610e7c37e6bca3440bdd880c3dd0aead, type: 3}
   army2Sprites:
-  - {fileID: 21300016, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
-  - {fileID: 21300018, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
-  - {fileID: 21300020, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
+  - {fileID: 21300000, guid: 8381196bdd2de2a4ebf1397d6e323ddd, type: 3}
+  - {fileID: 21300002, guid: 8381196bdd2de2a4ebf1397d6e323ddd, type: 3}
+  - {fileID: 21300004, guid: 8381196bdd2de2a4ebf1397d6e323ddd, type: 3}
+  - {fileID: 21300006, guid: 8381196bdd2de2a4ebf1397d6e323ddd, type: 3}
+  obstacleSprites:
+  - {fileID: 21300000, guid: 32e254c131aac3d4c8a2840b355c055f, type: 3}
+  - {fileID: 21300000, guid: 037b5fe0f73c1cd4ab091eb0f4ee7ea0, type: 3}
+  - {fileID: 21300000, guid: 037b5fe0f73c1cd4ab091eb0f4ee7ea0, type: 3}
+  - {fileID: 21300000, guid: 3e7b6bc3b2395d44a8b11cebce97b3c5, type: 3}
+  - {fileID: 21300000, guid: 117303c5b43af2942a46549fec4eefa7, type: 3}
   numberSprites:
   - {fileID: 21300052, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}
   - {fileID: 21300056, guid: c34caf94f5cdc094ea575175f0ea050d, type: 3}

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using Gamelogic;
 using Gamelogic.Grids;
@@ -36,7 +37,8 @@ namespace DuckDuckBoom.GunRunner.Game
 		public SpriteRenderer tileSprite;
 		public SpriteRenderer selectedSprite;
 		public SpriteRenderer stackSprite;
-		public SpriteRenderer[] stackNumberSprites;
+		//public SpriteRenderer[] stackNumberSprites;
+		public Text stackNumberText;
 		//frozen
 		//etc
 		private AudioSource myAudio;
@@ -162,22 +164,23 @@ namespace DuckDuckBoom.GunRunner.Game
 			if (stackValue > 1)
 			{
 				stackSprite.gameObject.SetActive(true);
+				stackNumberText.text = stackValue.ToString();
 				//set stack number
-				if (stackValue > 9)
-				{
-					stackNumberSprites[0].enabled = false;
-					stackNumberSprites[1].enabled = true;
-					stackNumberSprites[2].enabled = true;
-					stackNumberSprites[1].sprite = tileSet.numberSprites[stackValue % 10];
-					stackNumberSprites[2].sprite = tileSet.numberSprites[stackValue / 10];
-				}
-				else
-				{
-					stackNumberSprites[0].enabled = true;
-					stackNumberSprites[0].sprite = tileSet.numberSprites[stackValue];
-					stackNumberSprites[1].enabled = false;
-					stackNumberSprites[2].enabled = false;
-				}
+				//if (stackValue > 9)
+				//{
+				//	stackNumberSprites[0].enabled = false;
+				//	stackNumberSprites[1].enabled = true;
+				//	stackNumberSprites[2].enabled = true;
+				//	stackNumberSprites[1].sprite = tileSet.numberSprites[stackValue % 10];
+				//	stackNumberSprites[2].sprite = tileSet.numberSprites[stackValue / 10];
+				//}
+				//else
+				//{
+				//	stackNumberSprites[0].enabled = true;
+				//	stackNumberSprites[0].sprite = tileSet.numberSprites[stackValue];
+				//	stackNumberSprites[1].enabled = false;
+				//	stackNumberSprites[2].enabled = false;
+				//}
 			}
 			else
 			{

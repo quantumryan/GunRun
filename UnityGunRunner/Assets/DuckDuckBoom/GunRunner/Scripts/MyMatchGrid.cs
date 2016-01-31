@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 using Gamelogic.Grids;
 using UnityEngine.UI;
 
@@ -16,8 +17,8 @@ namespace DuckDuckBoom.GunRunner.Game
 		public Text gunsUI;
 		public int money = 0;
 		public Text moneyUI;
-		public int costOfGuns = 50;
-		public Text costOfGunsUI;
+		public int buyCost = 50;
+		public Text buyCostUI;
 		public int bluePower = 10; //army2, red vs. blue, army1 vs army2
 		public Text bluePowerUI;
 		public int redPower = 10; //army1, red vs. blue, army1 vs army2
@@ -55,6 +56,8 @@ namespace DuckDuckBoom.GunRunner.Game
 		// call after turn ends, before spawning new things 
 		private void BuildWeightedTileTypeList()
 		{
+			//build a bag of random
+			tileTypeDist.Clear();
 			float powerBalance = (float)redPower / (float)bluePower;
 			if (powerBalance < 1.0f)
 			{
@@ -83,13 +86,16 @@ namespace DuckDuckBoom.GunRunner.Game
 			for (int i = 0; i < weightGuns; i++) tileTypeDist.Add(TileType.Gun);
 			for (int i = 0; i < weightFuel; i++) tileTypeDist.Add(TileType.Fuel);
 			//for (int i = 0; i < 20; i++) tileTypeDist.Add(TileType.Obstacle);
+
+
+			buyCost = (int)Mathf.Lerp(50, 200, powerBalance - 1.0f);
 		}
 
 		
 		private void InitCell(MyMatchCell cell)
 		{
-			cell.TileType = TileTypeExtensions.SelectRandom();
-			//cell.Color = cellColors[colorIndex];
+			//cell.TileType = TileTypeExtensions.SelectRandom();
+			cell.TileType = tileTypeDist[Random.Range(0, tileTypeDist.Count)];
 			cell.IsMoving = false;
 		}
 
@@ -98,21 +104,33 @@ namespace DuckDuckBoom.GunRunner.Game
 			if (isDrag && myMatchGrid.Contains(MousePosition))
 			{
 				var mouseOverCell = myMatchGrid[MousePosition];
-				if (mouseOverCell.IsSelectable && !mouseOverCell.IsSelected)
+				float distMouseToOverCell = GridBuilderUtils.ScreenToWorld(mouseOverCell.gameObject, Input.mousePosition).magnitude;
+				//Debug.Log("distMouseToOverCell" + distMouseToOverCell);
+				//Vector3 worldPosition = GridBuilderUtils.ScreenToWorld(gameObject, Input.mousePosition);
+				//Vector3 worldPosition2 = GridBuilderUtils.ScreenToWorld(Input.mousePosition);
+				//Debug.Log("World pos: " + worldPosition + " Input.mousePosition: " + Input.mousePosition + " " + worldPosition2);
+				//Vector3 tilepos = GridBuilderUtils.ScreenToWorld(mouseOverCell.gameObject, Input.mousePosition); 
+				//Debug.Log("World pos of mouse: " + worldPosition + " Input.mousePosition: " + Input.mousePosition + " " + tilepos);
+
+				if (distMouseToOverCell < 80)
 				{
-					var neighbors = myMatchGrid.GetNeighbors(lastCellPoint).ToPointList();
-					if (lastCellSelected == null || neighbors.Contains(MousePosition))
+
+					if (mouseOverCell.IsSelectable && !mouseOverCell.IsSelected)
 					{
-						mouseOverCell.IsSelectable = false;
-						mouseOverCell.IsSelected = true;
-						lastCellSelected = mouseOverCell;
-						lastCellPoint = MousePosition;
+						var neighbors = myMatchGrid.GetNeighbors(lastCellPoint).ToPointList();
+						if (lastCellSelected == null || neighbors.Contains(MousePosition))
+						{
+							mouseOverCell.IsSelectable = false;
+							mouseOverCell.IsSelected = true;
+							lastCellSelected = mouseOverCell;
+							lastCellPoint = MousePosition;
 
-						selectedSet.Add(lastCellPoint);
-						selectedTileTypes.Add(lastCellSelected.TileType);
+							selectedSet.Add(lastCellPoint);
+							selectedTileTypes.Add(lastCellSelected.TileType);
 
-						//what are the valid selection types
-						DetermineValidTileTypesForMatching();
+							//what are the valid selection types
+							DetermineValidTileTypesForMatching();
+						}
 					}
 				}
 			}
@@ -125,7 +143,7 @@ namespace DuckDuckBoom.GunRunner.Game
 			fuelUI.text = fuel.ToString();
 			gunsUI.text = guns.ToString();
 			moneyUI.text = money.ToString("$0");
-			costOfGunsUI.text = costOfGuns.ToString();
+			buyCostUI.text = buyCost.ToString("$0");
 			bluePowerUI.text = bluePower.ToString();
 			redPowerUI.text = redPower.ToString();
 			powerSlider.value = 100 * bluePower / (redPower + bluePower);
@@ -292,7 +310,7 @@ namespace DuckDuckBoom.GunRunner.Game
 				{
 					//buy guns, both go away
 					int qty = cell1.StackValue*cell2.StackValue;
-					money -= costOfGuns * qty;
+					money -= buyCost * qty;
 					guns += qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
@@ -301,7 +319,7 @@ namespace DuckDuckBoom.GunRunner.Game
 				{
 					//buy fuel, both go away
 					int qty = cell1.StackValue * cell2.StackValue;
-					money -= costOfGuns * qty;
+					money -= buyCost * qty;
 					fuel += qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
@@ -313,21 +331,23 @@ namespace DuckDuckBoom.GunRunner.Game
 				{
 					//guns turn into army, set both to none, then change last
 					int qty = cell1.StackValue + cell2.StackValue;
-					lastCell.TileType = TileType.Army1;
-					lastCell.StackValue = qty;
 					guns -= cell1.StackValue;
+					money += buyCost * qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
+					lastCell.TileType = TileType.Army1;
+					lastCell.StackValue = qty;
 				}
 				else if (cell2.TileType == TileType.Army2)
 				{
 					//guns turn into army
 					int qty = cell1.StackValue + cell2.StackValue;
-					lastCell.TileType = TileType.Army2;
-					lastCell.StackValue = qty;
 					guns -= cell1.StackValue;
+					money += buyCost * qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
+					lastCell.TileType = TileType.Army2;
+					lastCell.StackValue = qty;
 				}
 			}
 			else if (cell1.TileType == TileType.Army1)
@@ -335,17 +355,26 @@ namespace DuckDuckBoom.GunRunner.Game
 				if (cell2.TileType == TileType.Army2)
 				{
 					//armies fight, could be one wins or trade
-					int delta = Mathf.Abs(cell1.StackValue - cell2.StackValue);
-					if (cell1.StackValue > cell2.StackValue)
+					int redArmy = cell1.StackValue;
+					int blueArmy = cell2.StackValue;
+					if (redArmy > blueArmy)
 					{
-						//red wins
-						bluePower -= cell1.StackValue;
-						redPower += delta;
+						//red wins, blue is overwhelmed losing its troops and red converts troops into power
+						int delta = redArmy - blueArmy;
+						bluePower = bluePower - blueArmy;
+						redPower = redPower - blueArmy + delta;
+					}
+					else if (cell1.StackValue < cell2.StackValue)
+					{
+						//blue wins, red is overwhelmed losing its troops
+						int delta = blueArmy - redArmy;
+						bluePower = bluePower - redArmy + delta;
+						redPower = redPower - redArmy;
 					}
 					else
 					{
-						//blue wins
-						bluePower += delta;
+						//its a tie
+						bluePower -= cell1.StackValue;
 						redPower -= cell2.StackValue;
 					}
 					cell1.StackValue = 0;

@@ -1,0 +1,90 @@
+fileFormatVersion: 2
+guid: 037b5fe0f73c1cd4ab091eb0f4ee7ea0
+timeCreated: 1454211161
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: TilePolice_0
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 1
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: TilePolice_0
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 0
+        width: 263
+        height: 309
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 123.5, y: -125.5}
+        - {x: 97.5, y: -46.5}
+        - {x: 117.5, y: -11.5}
+        - {x: 131.5, y: 31.5}
+        - {x: 131.5, y: 83.5}
+        - {x: 124.5, y: 86.5}
+        - {x: 35.5, y: 80.5}
+        - {x: 11.5, y: 154.5}
+        - {x: -40.5, y: 154.5}
+        - {x: -66.5, y: 116.5}
+        - {x: -106.5, y: 101.5}
+        - {x: -102.5, y: 65.5}
+        - {x: -131.5, y: 32.5}
+        - {x: -131.5, y: -37.5}
+        - {x: -124.5, y: -77.5}
+        - {x: -108.5, y: -123.5}
+        - {x: -111.5, y: -154.5}
+        - {x: -57.5, y: -154.5}
+        - {x: -5.5, y: -108.5}
+        - {x: 23.5, y: -136.5}
+        - {x: 67.5, y: -142.5}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,92 @@
+fileFormatVersion: 2
+guid: e132414d77e646947ac602a3801caa1e
+timeCreated: 1454211120
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: TileMoney_0
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 1
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: TileMoney_0
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 4
+        width: 260
+        height: 278
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 130, y: -17}
+        - {x: 114, y: 13}
+        - {x: 95, y: 28}
+        - {x: 78, y: 36}
+        - {x: 62, y: 59}
+        - {x: 62, y: 108}
+        - {x: 53, y: 125}
+        - {x: 19, y: 138}
+        - {x: 7, y: 139}
+        - {x: -88, y: 139}
+        - {x: -101, y: 137}
+        - {x: -123, y: 110}
+        - {x: -130, y: 89}
+        - {x: -130, y: -1}
+        - {x: -117, y: -52}
+        - {x: -112, y: -115}
+        - {x: -92, y: -124}
+        - {x: -51, y: -132}
+        - {x: 4, y: -139}
+        - {x: 70, y: -139}
+        - {x: 109, y: -119}
+        - {x: 121, y: -104}
+        - {x: 130, y: -84}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
