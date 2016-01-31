@@ -11,9 +11,18 @@ namespace DuckDuckBoom.GunRunner.Game
 	public class MyMatchGrid : GridBehaviour<RectPoint>
 	{
 		public int fuel = 0;
+		public Text fuelUI;
 		public int guns = 0;
+		public Text gunsUI;
 		public int money = 0;
+		public Text moneyUI;
 		public int costOfGuns = 50;
+		public Text costOfGunsUI;
+		public int bluePower = 10; //army2, red vs. blue, army1 vs army2
+		public Text bluePowerUI;
+		public int redPower = 10; //army1, red vs. blue, army1 vs army2
+		public Text redPowerUI;
+		public Slider powerSlider;
 
 		public float animationTimePerCell = .1f;
 		public bool useAcceleration = false;
@@ -27,13 +36,13 @@ namespace DuckDuckBoom.GunRunner.Game
 
 		private HashSet<TileType> selectedTileTypes;
 
-
-		public Text debugTextUI;
-
+		private List<TileType> tileTypeDist = new List<TileType>(); //weighted random distributed list
 		void Start()
 		{
+			BuildWeightedTileTypeList();
 			selectedSet = new HashSet<RectPoint>();
 			selectedTileTypes = new HashSet<TileType>();
+			UpdateGuiElements();
 		}
 
 		public override void InitGrid()
@@ -42,9 +51,43 @@ namespace DuckDuckBoom.GunRunner.Game
 			myMatchGrid.Apply(InitCell);
 		}
 
+
+		// call after turn ends, before spawning new things 
+		private void BuildWeightedTileTypeList()
+		{
+			float powerBalance = (float)redPower / (float)bluePower;
+			if (powerBalance < 1.0f)
+			{
+				powerBalance = 1f / powerBalance;
+				//flip army1 and army2
+				
+			}
+			else
+			{
+
+			}
+
+			int weightArmy1 = (int)Mathf.Lerp(25, 30, powerBalance - 1.0f);
+			int weightArmy2 = (int)Mathf.Lerp(25, 15, powerBalance - 1.0f);
+			int weightMoney = (int)Mathf.Lerp(20, 10, powerBalance - 1.0f);
+			int weightGuns = (int)Mathf.Lerp(20, 10, powerBalance - 1.0f);
+			int weightFuel = (int)Mathf.Lerp(5, 5, powerBalance - 1.0f);
+			//int weightObstacles = 5;
+
+			Debug.Log("Weight distribution, power balance is " + powerBalance + " which gives: " + weightArmy1 + " " + weightArmy2 + " " + weightMoney + " " + weightGuns + " " + weightFuel);
+
+			tileTypeDist.Clear();
+			for (int i = 0; i < weightArmy1; i++) tileTypeDist.Add(TileType.Army1);
+			for (int i = 0; i < weightArmy2; i++) tileTypeDist.Add(TileType.Army2);
+			for (int i = 0; i < weightMoney; i++) tileTypeDist.Add(TileType.Money);
+			for (int i = 0; i < weightGuns; i++) tileTypeDist.Add(TileType.Gun);
+			for (int i = 0; i < weightFuel; i++) tileTypeDist.Add(TileType.Fuel);
+			//for (int i = 0; i < 20; i++) tileTypeDist.Add(TileType.Obstacle);
+		}
+
+		
 		private void InitCell(MyMatchCell cell)
 		{
-			//int colorIndex = Random.Range(0, cellColors.Length);
 			cell.TileType = TileTypeExtensions.SelectRandom();
 			//cell.Color = cellColors[colorIndex];
 			cell.IsMoving = false;
@@ -70,13 +113,22 @@ namespace DuckDuckBoom.GunRunner.Game
 
 						//what are the valid selection types
 						DetermineValidTileTypesForMatching();
-
-						//DetermineValidMatchTypes();
 					}
 				}
 			}
 
 			if (Input.GetMouseButtonUp(0)) DoneDrag();
+		}
+
+		void UpdateGuiElements()
+		{
+			fuelUI.text = fuel.ToString();
+			gunsUI.text = guns.ToString();
+			moneyUI.text = money.ToString("$0");
+			costOfGunsUI.text = costOfGuns.ToString();
+			bluePowerUI.text = bluePower.ToString();
+			redPowerUI.text = redPower.ToString();
+			powerSlider.value = 100 * bluePower / (redPower + bluePower);
 		}
 
 
@@ -133,55 +185,15 @@ namespace DuckDuckBoom.GunRunner.Game
 					}
 				}
 			}
-
-
-
-			debugTextUI.text += "DetermineValidTileTypesForMatching\n\n";
-			debugTextUI.text += "    selectedTileTypes\n";
-			foreach (TileType tt in selectedTileTypes)
-			{
-				debugTextUI.text += tt.ToString() + "\n";
-			}
-
-			debugTextUI.text += "    validTileTypesForSelection TileTypes\n";
-			if (validTileTypesForSelection.Count < 1)
-			{
-				debugTextUI.text += "None";
-			}
-			else
-			{
-				foreach (TileType tt in validTileTypesForSelection)
-				{
-					debugTextUI.text += tt.ToString() + "\n";
-				}
-			}
 		}
 
 
-		//void DetermineValidMatchTypes()
-		//{
-		//	foreach (var point in myMatchGrid)
-		//	{
-		//		var MyMatchCell = myMatchGrid[point];
-		//		//if (!CheckMatch(MousePosition, point))
-		//		if (CheckSelectableTleType(point))
-		//		{
-		//			MyMatchCell.IsSelectable = false;
-		//		}
-		//		else
-		//		{
-		//			MyMatchCell.IsSelectable = true;
-		//		}
-		//	}
-		//}
 
 		// clear match tiles & sort tile grid when dragged
 		void DoneDrag()
 		{
 			isDrag = false;
-
-			debugTextUI.text = "";
-
+			
 			if (lastCellSelected != null)
 			{
 				//unset all
@@ -191,6 +203,7 @@ namespace DuckDuckBoom.GunRunner.Game
 					myMatchGrid[point].IsSelected = false;
 				}
 
+				List<MyMatchCell> remainingCells = new List<MyMatchCell>();
 				foreach (TileType tt in selectedTileTypes)
 				{
 					int countStack = 0;
@@ -204,13 +217,26 @@ namespace DuckDuckBoom.GunRunner.Game
 							lastpoint = rp;
 						}
 					}
-					if(lastpoint != null) myMatchGrid[lastpoint].StackValue = countStack;
-					//lastCellSelected.StackValue = countStack;
+					myMatchGrid[lastpoint].StackValue = countStack;
+					remainingCells.Add(myMatchGrid[lastpoint]);
 				}
-				//selectedSet.Remove(lastCellPoint);
 
-				//DestroyMatchedCells(selectedSet);
-				// Destroy Zero Value Cells
+
+				// order by tile type
+				var result = from element in remainingCells
+									orderby element.TileType
+									select element;
+
+				//determine if combines should occur
+				if (remainingCells.Count > 1)
+				{
+					MyMatchCell cell1 = result.ElementAt(0);
+					MyMatchCell cell2 = result.ElementAt(1);
+					CombineTiles(cell1, cell2, lastCellSelected);
+				}
+				
+
+				// Destroy <= Zero Value Cells
 				foreach (var point in myMatchGrid)
 				{
 					var MyMatchCell = myMatchGrid[point];
@@ -224,16 +250,23 @@ namespace DuckDuckBoom.GunRunner.Game
 				IGrid<int, RectPoint> emptyCellsBelowCount = CountEmptyCellsBelowEachCell();
 				StartMovingCells(emptyCellsBelowCount);
 
+				// call after turn ends, before spawning new things 
+				BuildWeightedTileTypeList();
+
 				int[] emptyCellsBelowTopCount = CountEmptyCellsBelowTop();
 				MakeNewCellsAndStartMovingThem(emptyCellsBelowTopCount);
 
 				selectedSet.Clear();
 				selectedTileTypes.Clear();
 				lastCellSelected = null;
+				UpdateGuiElements();
 			}
 		}
 
-
+		/// <summary>
+		/// Starts the drag process, which is done in Update.
+		/// </summary>
+		/// <param name="clickedPoint"></param>
 		public void OnClick(RectPoint clickedPoint)
 		{
 			if (myMatchGrid.Values.Any(c => c == null || c.IsMoving)) //If any cell is moving, ignore input
@@ -244,6 +277,84 @@ namespace DuckDuckBoom.GunRunner.Game
 			isDrag = true;
 		}
 
+		/// <summary>
+		/// Hamdles the comnining conditions of multiple cell types.
+		/// </summary>
+		/// <param name="cell1"></param>
+		/// <param name="cell2"></param>
+		/// <param name="lastCell"></param>
+		void CombineTiles(MyMatchCell cell1, MyMatchCell cell2, MyMatchCell lastCell)
+		{
+			//Debug.Log("  Combining " + cell1.TileType + " and " + cell2.TileType);
+			if(cell1.TileType == TileType.Money)
+			{
+				if(cell2.TileType == TileType.Gun)
+				{
+					//buy guns, both go away
+					int qty = cell1.StackValue*cell2.StackValue;
+					money -= costOfGuns * qty;
+					guns += qty;
+					cell1.StackValue = 0;
+					cell2.StackValue = 0;
+				}
+				else if (cell2.TileType == TileType.Fuel)
+				{
+					//buy fuel, both go away
+					int qty = cell1.StackValue * cell2.StackValue;
+					money -= costOfGuns * qty;
+					fuel += qty;
+					cell1.StackValue = 0;
+					cell2.StackValue = 0;
+				}
+			}
+			else if (cell1.TileType == TileType.Gun)
+			{
+				if (cell2.TileType == TileType.Army1)
+				{
+					//guns turn into army, set both to none, then change last
+					int qty = cell1.StackValue + cell2.StackValue;
+					lastCell.TileType = TileType.Army1;
+					lastCell.StackValue = qty;
+					guns -= cell1.StackValue;
+					cell1.StackValue = 0;
+					cell2.StackValue = 0;
+				}
+				else if (cell2.TileType == TileType.Army2)
+				{
+					//guns turn into army
+					int qty = cell1.StackValue + cell2.StackValue;
+					lastCell.TileType = TileType.Army2;
+					lastCell.StackValue = qty;
+					guns -= cell1.StackValue;
+					cell1.StackValue = 0;
+					cell2.StackValue = 0;
+				}
+			}
+			else if (cell1.TileType == TileType.Army1)
+			{
+				if (cell2.TileType == TileType.Army2)
+				{
+					//armies fight, could be one wins or trade
+					int delta = Mathf.Abs(cell1.StackValue - cell2.StackValue);
+					if (cell1.StackValue > cell2.StackValue)
+					{
+						//red wins
+						bluePower -= cell1.StackValue;
+						redPower += delta;
+					}
+					else
+					{
+						//blue wins
+						bluePower += delta;
+						redPower -= cell2.StackValue;
+					}
+					cell1.StackValue = 0;
+					cell2.StackValue = 0;
+				}
+			}
+		}
+
+
 		//original
 		private bool CheckMatch(RectPoint p, RectPoint q)
 		{
@@ -253,37 +364,6 @@ namespace DuckDuckBoom.GunRunner.Game
 			return myMatchGrid[p].TileType == myMatchGrid[q].TileType;
 		}
 
-
-		//private bool CheckSelectableTleType(RectPoint p)
-		//{
-		//	if (myMatchGrid[p] == null) return false;
-			
-		//	foreach(TileType tt in validTileTypesForSelection)
-		//	{
-		//		if (myMatchGrid[p].TileType == tt)
-		//		{
-		//			return true;
-		//		}
-		//	}
-		//	return false;
-		//}
-
-
-
-		//private void DestroyMatchedCells(IEnumerable<RectPoint> connectedSet)
-		//{
-		//	foreach (var rectPoint in connectedSet)
-		//	{
-		//		var MyMatchCell = myMatchGrid[rectPoint];
-
-		//		if (MyMatchCell != null)
-		//		{
-		//			Destroy(MyMatchCell.gameObject);
-		//		}
-
-		//		myMatchGrid[rectPoint] = null;
-		//	}
-		//}
 
 		//Start moving cells that have empty cells below them
 		private void StartMovingCells(IGrid<int, RectPoint> emptyCellsBelowCount)
