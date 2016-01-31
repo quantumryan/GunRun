@@ -90,14 +90,14 @@ PlayerSettings:
     16:9: 1
     Others: 0
   bundleIdentifier: com.Company.ProductName
-  bundleVersion: 0.02.27.a
+  bundleVersion: 0.02.44.a
   preloadedAssets: []
   metroEnableIndependentInputSource: 0
   metroEnableLowLatencyPresentationAPI: 0
   xboxOneDisableKinectGpuReservation: 0
   virtualRealitySupported: 0
   productGUID: dc708486c18971b46ab5843bd31dbcb1
-  AndroidBundleVersionCode: 227
+  AndroidBundleVersionCode: 244
   AndroidMinSdkVersion: 9
   AndroidPreferredInstallLocation: 1
   aotOptions: 
