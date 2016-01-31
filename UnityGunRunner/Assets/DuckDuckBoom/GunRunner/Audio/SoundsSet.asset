@@ -17,3 +17,20 @@ MonoBehaviour:
   - {fileID: 8300000, guid: df8edf356a3dfcd458a1c0701c4d761c, type: 3}
   - {fileID: 8300000, guid: 296277ec40d261b44bfe0f74c55c7784, type: 3}
   - {fileID: 8300000, guid: a569d6976e1f1ae47a026f3de14d07f1, type: 3}
+  stackCoins:
+  - {fileID: 8300000, guid: b8d649f9e8153904d99119369f2e0d12, type: 3}
+  - {fileID: 8300000, guid: d65d8193bba729b4fb6b6f56b0897864, type: 3}
+  stackArmy:
+  - {fileID: 8300000, guid: e7ce850165923c14faf7061954826339, type: 3}
+  stackGuns:
+  - {fileID: 8300000, guid: 44a562871b5d59549a0feb1cf6ddaaf3, type: 3}
+  stackFuel:
+  - {fileID: 8300000, guid: 38c1610537af2754899182e9b8fc8503, type: 3}
+  combineSell:
+  - {fileID: 8300000, guid: 6faab571e0f690546adef186d07b6131, type: 3}
+  combineBuyGuns:
+  - {fileID: 8300000, guid: 0e0eb10849a6d534391b22a7865555c0, type: 3}
+  combineBuyFuel:
+  - {fileID: 8300000, guid: f6aca289cb05ca04d8d7bf47cec2213b, type: 3}
+  combineFight:
+  - {fileID: 8300000, guid: f8c31e130a16c844ea2fd0096c7855e2, type: 3}

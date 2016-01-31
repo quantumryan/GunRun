@@ -15,5 +15,13 @@ namespace DuckDuckBoom.GunRunner.Game
 #endif
 
 		public AudioClip[] swipe;
+		public AudioClip[] stackCoins;
+		public AudioClip[] stackArmy;
+		public AudioClip[] stackGuns;
+		public AudioClip[] stackFuel;
+		public AudioClip[] combineSell;
+		public AudioClip[] combineBuyGuns;
+		public AudioClip[] combineBuyFuel;
+		public AudioClip[] combineFight;
 	}
 }

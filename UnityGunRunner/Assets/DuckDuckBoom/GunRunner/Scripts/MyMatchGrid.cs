@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
-using Gamelogic.Grids;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
+using Gamelogic;
+using Gamelogic.Grids;
 
 namespace DuckDuckBoom.GunRunner.Game
 {
@@ -33,16 +34,20 @@ namespace DuckDuckBoom.GunRunner.Game
 
 		private MyMatchCell lastCellSelected;
 		private RectPoint lastCellPoint;
-		private HashSet<RectPoint> selectedSet;
-
-		private HashSet<TileType> selectedTileTypes;
+		private HashSet<RectPoint> selectedSet = new HashSet<RectPoint>();
+		private HashSet<TileType> selectedTileTypes = new HashSet<TileType>();
 
 		private List<TileType> tileTypeDist = new List<TileType>(); //weighted random distributed list
+
+
+		public SoundsSet soundSet;
+		private AudioSource myAudio;
+
 		void Start()
 		{
+			myAudio = GetComponent<AudioSource>();
+
 			BuildWeightedTileTypeList();
-			selectedSet = new HashSet<RectPoint>();
-			selectedTileTypes = new HashSet<TileType>();
 			UpdateGuiElements();
 		}
 
@@ -62,33 +67,39 @@ namespace DuckDuckBoom.GunRunner.Game
 			if (powerBalance < 1.0f)
 			{
 				powerBalance = 1f / powerBalance;
-				//flip army1 and army2
-				
 			}
-			else
+			int armyWin = (int)Mathf.Lerp(25, 30, powerBalance - 1.0f);
+			int armyLose = (int)Mathf.Lerp(25, 15, powerBalance - 1.0f);
+			
+			int weightArmyBlue = armyWin;
+			int weightArmyRed = armyLose;
+			if (redPower > bluePower)
 			{
-
+				weightArmyBlue = armyLose;
+				weightArmyRed = armyWin;
 			}
-
-			int weightArmy1 = (int)Mathf.Lerp(25, 30, powerBalance - 1.0f);
-			int weightArmy2 = (int)Mathf.Lerp(25, 15, powerBalance - 1.0f);
 			int weightMoney = (int)Mathf.Lerp(20, 10, powerBalance - 1.0f);
 			int weightGuns = (int)Mathf.Lerp(20, 10, powerBalance - 1.0f);
 			int weightFuel = (int)Mathf.Lerp(5, 5, powerBalance - 1.0f);
 			//int weightObstacles = 5;
 
-			Debug.Log("Weight distribution, power balance is " + powerBalance + " which gives: " + weightArmy1 + " " + weightArmy2 + " " + weightMoney + " " + weightGuns + " " + weightFuel);
-
+			
 			tileTypeDist.Clear();
-			for (int i = 0; i < weightArmy1; i++) tileTypeDist.Add(TileType.Army1);
-			for (int i = 0; i < weightArmy2; i++) tileTypeDist.Add(TileType.Army2);
+			for (int i = 0; i < weightArmyRed; i++) tileTypeDist.Add(TileType.Army1);
+			for (int i = 0; i < weightArmyBlue; i++) tileTypeDist.Add(TileType.Army2);
 			for (int i = 0; i < weightMoney; i++) tileTypeDist.Add(TileType.Money);
 			for (int i = 0; i < weightGuns; i++) tileTypeDist.Add(TileType.Gun);
 			for (int i = 0; i < weightFuel; i++) tileTypeDist.Add(TileType.Fuel);
 			//for (int i = 0; i < 20; i++) tileTypeDist.Add(TileType.Obstacle);
 
+			
 
-			buyCost = (int)Mathf.Lerp(50, 200, powerBalance - 1.0f);
+			//
+			// impact of balance on important numbers
+			buyCost = (int)Mathf.LerpUnclamped(50, 100, powerBalance - 1.0f);
+
+
+			Debug.Log("Weight dist, p-balance " + powerBalance + " -> [ " + weightArmyRed + " " + weightArmyBlue + " " + weightMoney + " " + weightGuns + " " + weightFuel + " ] $" + buyCost);
 		}
 
 		
@@ -104,17 +115,11 @@ namespace DuckDuckBoom.GunRunner.Game
 			if (isDrag && myMatchGrid.Contains(MousePosition))
 			{
 				var mouseOverCell = myMatchGrid[MousePosition];
+				//use distnace between mouse and current cell to help with diagonal selections
 				float distMouseToOverCell = GridBuilderUtils.ScreenToWorld(mouseOverCell.gameObject, Input.mousePosition).magnitude;
-				//Debug.Log("distMouseToOverCell" + distMouseToOverCell);
-				//Vector3 worldPosition = GridBuilderUtils.ScreenToWorld(gameObject, Input.mousePosition);
-				//Vector3 worldPosition2 = GridBuilderUtils.ScreenToWorld(Input.mousePosition);
-				//Debug.Log("World pos: " + worldPosition + " Input.mousePosition: " + Input.mousePosition + " " + worldPosition2);
-				//Vector3 tilepos = GridBuilderUtils.ScreenToWorld(mouseOverCell.gameObject, Input.mousePosition); 
-				//Debug.Log("World pos of mouse: " + worldPosition + " Input.mousePosition: " + Input.mousePosition + " " + tilepos);
 
 				if (distMouseToOverCell < 80)
 				{
-
 					if (mouseOverCell.IsSelectable && !mouseOverCell.IsSelected)
 					{
 						var neighbors = myMatchGrid.GetNeighbors(lastCellPoint).ToPointList();
@@ -122,6 +127,8 @@ namespace DuckDuckBoom.GunRunner.Game
 						{
 							mouseOverCell.IsSelectable = false;
 							mouseOverCell.IsSelected = true;
+							myAudio.PlayOneShot(soundSet.swipe.RandomItem(), 1.0f);
+
 							lastCellSelected = mouseOverCell;
 							lastCellPoint = MousePosition;
 
@@ -153,18 +160,20 @@ namespace DuckDuckBoom.GunRunner.Game
 		void DetermineValidTileTypesForMatching()
 		{
 			HashSet<TileType> validTileTypesForSelection = new HashSet<TileType>();
+			validTileTypesForSelection.Add(TileType.Money);
+			validTileTypesForSelection.Add(TileType.Gun);
+			validTileTypesForSelection.Add(TileType.Fuel);
+			validTileTypesForSelection.Add(TileType.Army1);
+			validTileTypesForSelection.Add(TileType.Army2);
+			//validTileTypesForSelection.Add(TileType.Army2);
 
-			if (selectedTileTypes.Count > 1)
+			if(selectedSet.Count == 0)
 			{
-				validTileTypesForSelection = selectedTileTypes;
+				//everything is ok to select
 			}
-			else
+			else if(selectedSet.Count == 1)
 			{
-				validTileTypesForSelection.Add(TileType.Money);
-				validTileTypesForSelection.Add(TileType.Gun);
-				validTileTypesForSelection.Add(TileType.Fuel);
-				validTileTypesForSelection.Add(TileType.Army1);
-				validTileTypesForSelection.Add(TileType.Army2);
+			//only one selected tile, can match with everything that's ok
 				switch (selectedTileTypes.ElementAt(0))
 				{
 					case TileType.Money:
@@ -191,6 +200,21 @@ namespace DuckDuckBoom.GunRunner.Game
 						throw new ArgumentOutOfRangeException("tileType");
 				}
 			}
+			else if (selectedSet.Count >= 2)
+			{
+				if(selectedTileTypes.Count == 1)
+				{
+					//can only select the current type
+					validTileTypesForSelection.Clear();
+					validTileTypesForSelection.Add(selectedTileTypes.ElementAt(0));
+				}
+				if (selectedTileTypes.Count >= 2)
+				{
+					//can only merge two tiles of different types, so move is over
+					validTileTypesForSelection.Clear();
+				}
+			}
+			
 
 			foreach (var point in myMatchGrid)
 			{
@@ -211,16 +235,19 @@ namespace DuckDuckBoom.GunRunner.Game
 		void DoneDrag()
 		{
 			isDrag = false;
-			
-			if (lastCellSelected != null)
-			{
-				//unset all
-				foreach (var point in myMatchGrid)
-				{
-					myMatchGrid[point].IsSelectable = true;
-					myMatchGrid[point].IsSelected = false;
-				}
 
+			//unset all
+			foreach (var point in myMatchGrid)
+			{
+				myMatchGrid[point].IsSelectable = true;
+				myMatchGrid[point].IsSelected = false;
+			}
+
+			if (lastCellSelected != null && selectedSet.Count > 1)
+			{
+
+				//to catch long, multi-type chain selections, such as g-g-g-m-m-g-m-g-g-m
+				// this combines each type into their last locations and stores them in remainingCells
 				List<MyMatchCell> remainingCells = new List<MyMatchCell>();
 				foreach (TileType tt in selectedTileTypes)
 				{
@@ -240,10 +267,10 @@ namespace DuckDuckBoom.GunRunner.Game
 				}
 
 
-				// order by tile type
+				// order by tile type, so simpler if() logic
 				var result = from element in remainingCells
-									orderby element.TileType
-									select element;
+								 orderby element.TileType
+								 select element;
 
 				//determine if combines should occur
 				if (remainingCells.Count > 1)
@@ -252,7 +279,31 @@ namespace DuckDuckBoom.GunRunner.Game
 					MyMatchCell cell2 = result.ElementAt(1);
 					CombineTiles(cell1, cell2, lastCellSelected);
 				}
-				
+				else
+				{
+					//do combine sounds
+					switch (lastCellSelected.TileType)
+					{
+						case TileType.Money:
+							myAudio.PlayOneShot(soundSet.stackCoins.RandomItem(), 1.0f);
+							break;
+						case TileType.Gun:
+							myAudio.PlayOneShot(soundSet.stackGuns.RandomItem(), 1.0f);
+							break;
+						case TileType.Fuel:
+							myAudio.PlayOneShot(soundSet.stackFuel.RandomItem(), 1.0f);
+							break;
+						case TileType.Army1:
+							myAudio.PlayOneShot(soundSet.stackArmy.RandomItem(), 1.0f);
+							break;
+						case TileType.Army2:
+							myAudio.PlayOneShot(soundSet.stackArmy.RandomItem(), 1.0f);
+							break;
+						default:
+							throw new ArgumentOutOfRangeException("tileType");
+					}
+				}
+
 
 				// Destroy <= Zero Value Cells
 				foreach (var point in myMatchGrid)
@@ -274,11 +325,13 @@ namespace DuckDuckBoom.GunRunner.Game
 				int[] emptyCellsBelowTopCount = CountEmptyCellsBelowTop();
 				MakeNewCellsAndStartMovingThem(emptyCellsBelowTopCount);
 
-				selectedSet.Clear();
-				selectedTileTypes.Clear();
-				lastCellSelected = null;
-				UpdateGuiElements();
+				PowerStruggle();
 			}
+
+			selectedSet.Clear();
+			selectedTileTypes.Clear();
+			lastCellSelected = null;
+			UpdateGuiElements();
 		}
 
 		/// <summary>
@@ -309,11 +362,13 @@ namespace DuckDuckBoom.GunRunner.Game
 				if(cell2.TileType == TileType.Gun)
 				{
 					//buy guns, both go away
-					int qty = cell1.StackValue*cell2.StackValue;
+					int qty = cell1.StackValue * cell2.StackValue;
 					money -= buyCost * qty;
 					guns += qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
+
+					myAudio.PlayOneShot(soundSet.combineBuyGuns.RandomItem(), 1.0f);
 				}
 				else if (cell2.TileType == TileType.Fuel)
 				{
@@ -323,31 +378,39 @@ namespace DuckDuckBoom.GunRunner.Game
 					fuel += qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
+
+					myAudio.PlayOneShot(soundSet.combineBuyFuel.RandomItem(), 1.0f);
 				}
 			}
 			else if (cell1.TileType == TileType.Gun)
 			{
 				if (cell2.TileType == TileType.Army1)
 				{
-					//guns turn into army, set both to none, then change last
-					int qty = cell1.StackValue + cell2.StackValue;
-					guns -= cell1.StackValue;
+					//sell guns into, set both to none, then change last
+					int qty = cell1.StackValue * cell2.StackValue;
+					int armySize = qty; //cell2.StackValue;
+					guns -= qty;
 					money += buyCost * qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
 					lastCell.TileType = TileType.Army1;
-					lastCell.StackValue = qty;
+					lastCell.StackValue = armySize;
+
+					myAudio.PlayOneShot(soundSet.combineSell.RandomItem(), 1.0f);
 				}
 				else if (cell2.TileType == TileType.Army2)
 				{
-					//guns turn into army
-					int qty = cell1.StackValue + cell2.StackValue;
-					guns -= cell1.StackValue;
+					//sell guns into, set both to none, then change last
+					int qty = cell1.StackValue * cell2.StackValue;
+					int armySize = qty; // cell2.StackValue;
+					guns -= qty;
 					money += buyCost * qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
 					lastCell.TileType = TileType.Army2;
-					lastCell.StackValue = qty;
+					lastCell.StackValue = armySize;
+
+					myAudio.PlayOneShot(soundSet.combineSell.RandomItem(), 1.0f);
 				}
 			}
 			else if (cell1.TileType == TileType.Army1)
@@ -363,6 +426,8 @@ namespace DuckDuckBoom.GunRunner.Game
 						int delta = redArmy - blueArmy;
 						bluePower = bluePower - blueArmy;
 						redPower = redPower - blueArmy + delta;
+
+						myAudio.PlayOneShot(soundSet.combineFight.RandomItem(), 1.0f);
 					}
 					else if (cell1.StackValue < cell2.StackValue)
 					{
@@ -370,12 +435,16 @@ namespace DuckDuckBoom.GunRunner.Game
 						int delta = blueArmy - redArmy;
 						bluePower = bluePower - redArmy + delta;
 						redPower = redPower - redArmy;
+
+						myAudio.PlayOneShot(soundSet.combineFight.RandomItem(), 1.0f);
 					}
 					else
 					{
 						//its a tie
 						bluePower -= cell1.StackValue;
 						redPower -= cell2.StackValue;
+
+						myAudio.PlayOneShot(soundSet.combineFight.RandomItem(), 1.0f);
 					}
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
@@ -383,6 +452,11 @@ namespace DuckDuckBoom.GunRunner.Game
 			}
 		}
 
+
+		private void PowerStruggle()
+		{
+
+		}
 
 		//original
 		private bool CheckMatch(RectPoint p, RectPoint q)

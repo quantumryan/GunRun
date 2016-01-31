@@ -32,7 +32,6 @@ namespace DuckDuckBoom.GunRunner.Game
 	public class MyMatchCell : SpriteCell
 	{
 		public MyIconTileSet tileSet;
-		public SoundsSet soundSet;
 
 		public SpriteRenderer tileSprite;
 		public SpriteRenderer selectedSprite;
@@ -41,7 +40,6 @@ namespace DuckDuckBoom.GunRunner.Game
 		public Text stackNumberText;
 		//frozen
 		//etc
-		private AudioSource myAudio;
     
 
 		private bool isSelectable;
@@ -63,10 +61,6 @@ namespace DuckDuckBoom.GunRunner.Game
 
 			set
 			{
-				if(isSelected == false && value == true)
-				{
-					myAudio.PlayOneShot(soundSet.swipe.RandomItem(), 1.0f);
-				}
 				isSelected = value;
 				UpdatePresentation();
 			}
@@ -78,7 +72,6 @@ namespace DuckDuckBoom.GunRunner.Game
 			base.Awake();
 			isSelectable = true;
 			isSelected = false;
-			myAudio = GetComponent<AudioSource>();
 		}
 
 		[SerializeField]

@@ -89,7 +89,6 @@ GameObject:
   m_Component:
   - 4: {fileID: 410060}
   - 114: {fileID: 11432746}
-  - 82: {fileID: 8213856}
   m_Layer: 0
   m_Name: MyMatchCellPrefab
   m_TagString: Untagged
@@ -279,80 +278,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 427052}
   m_RootOrder: 0
---- !u!82 &8213856
-AudioSource:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 140826}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    - time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
 --- !u!114 &11432746
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -370,14 +295,9 @@ MonoBehaviour:
   frameIndex: 0
   highlightOn: 0
   tileSet: {fileID: 11400000, guid: 73f2e4cd62b04df4085f37753c678e9a, type: 2}
-  soundSet: {fileID: 11400000, guid: f95514d3536538a439b56283c284cc42, type: 2}
   tileSprite: {fileID: 21226724}
   selectedSprite: {fileID: 21234318}
   stackSprite: {fileID: 21246244}
-  stackNumberSprites:
-  - {fileID: 21270090}
-  - {fileID: 21265634}
-  - {fileID: 21254700}
   stackNumberText: {fileID: 11490338}
   tileType: 0
 --- !u!114 &11490338
