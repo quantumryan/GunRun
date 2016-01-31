@@ -11,11 +11,11 @@ namespace DuckDuckBoom.GunRunner.Game
     //We use this enum to be able to make comparisons for matches.
     public enum TileType
     {
-        Money,
-        Gun,
-        Fuel,
-        Army1,
-        Army2
+        Money,  //combines with guns, fuel
+        Gun,    //combines with money, army1, army2
+        Fuel,   //combines with money, 
+        Army1,  //combines with army2, gun
+        Army2   //combines with army1, gun
     }
 
     public static class TileTypeExtensions
@@ -147,12 +147,6 @@ namespace DuckDuckBoom.GunRunner.Game
             }
         }
 
-        public void AddToStack(int add)
-        {
-            StackValue = StackValue + add;
-            UpdatePresentation();
-        }
-
 
         private void UpdatePresentation()
         {
@@ -166,8 +160,8 @@ namespace DuckDuckBoom.GunRunner.Game
                     stackNumberSprites[0].enabled = false;
                     stackNumberSprites[1].enabled = true;
                     stackNumberSprites[2].enabled = true;
-                    stackNumberSprites[1].sprite = tileSet.numberSprites[stackValue / 10];
-                    stackNumberSprites[2].sprite = tileSet.numberSprites[stackValue % 10];
+                    stackNumberSprites[1].sprite = tileSet.numberSprites[stackValue % 10];
+                    stackNumberSprites[2].sprite = tileSet.numberSprites[stackValue / 10];
                 }
                 else
                 {
