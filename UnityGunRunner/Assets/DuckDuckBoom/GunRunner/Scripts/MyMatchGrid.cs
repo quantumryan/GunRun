@@ -43,6 +43,8 @@ namespace DuckDuckBoom.GunRunner.Game
 		public SoundsSet soundSet;
 		private AudioSource myAudio;
 
+		public Text debugText;
+
 		void Start()
 		{
 			myAudio = GetComponent<AudioSource>();
@@ -165,7 +167,10 @@ namespace DuckDuckBoom.GunRunner.Game
 			validTileTypesForSelection.Add(TileType.Fuel);
 			validTileTypesForSelection.Add(TileType.Army1);
 			validTileTypesForSelection.Add(TileType.Army2);
-			//validTileTypesForSelection.Add(TileType.Army2);
+			//validTileTypesForSelection.Add(TileType.Obstacle);
+			HashSet<TileType> tileTypesRequireInventoryCheck = new HashSet<TileType>();
+
+			//int stackedLimit = -1; //for valid cell check later, -1 is no limit, like when stacking
 
 			if(selectedSet.Count == 0)
 			{
@@ -173,32 +178,40 @@ namespace DuckDuckBoom.GunRunner.Game
 			}
 			else if(selectedSet.Count == 1)
 			{
-			//only one selected tile, can match with everything that's ok
+				int firstStack = myMatchGrid[selectedSet.ElementAt(0)].StackValue;
+				//only one selected tile, can match with everything that's ok
 				switch (selectedTileTypes.ElementAt(0))
 				{
 					case TileType.Money:
 						validTileTypesForSelection.Remove(TileType.Army1);
 						validTileTypesForSelection.Remove(TileType.Army2);
+						//stackedLimit = money / buyCost / firstStack;
 						break;
 					case TileType.Gun:
 						validTileTypesForSelection.Remove(TileType.Fuel);
+						//stackedLimit = guns / firstStack;
 						break;
 					case TileType.Fuel:
 						validTileTypesForSelection.Remove(TileType.Gun);
 						validTileTypesForSelection.Remove(TileType.Army1);
 						validTileTypesForSelection.Remove(TileType.Army2);
+						//stackedLimit = fuel / firstStack;
 						break;
 					case TileType.Army1:
 						validTileTypesForSelection.Remove(TileType.Money);
 						validTileTypesForSelection.Remove(TileType.Fuel);
+						//stackedLimit = money / buyCost / firstStack; //only applies if matching with guns
 						break;
 					case TileType.Army2:
 						validTileTypesForSelection.Remove(TileType.Money);
 						validTileTypesForSelection.Remove(TileType.Fuel);
+						//stackedLimit = money / buyCost / firstStack; //only applies if matching with guns
 						break;
 					default:
 						throw new ArgumentOutOfRangeException("tileType");
 				}
+
+				//Debug.Log("FirstStack is " + firstStack + "   stacked limit is " + stackedLimit);
 			}
 			else if (selectedSet.Count >= 2)
 			{
@@ -215,15 +228,31 @@ namespace DuckDuckBoom.GunRunner.Game
 				}
 			}
 			
-
+			//go through the grid and make it obvious what can be selected based on types and inventory
 			foreach (var point in myMatchGrid)
 			{
+				//turn it off first, then back on if conditions are met
 				myMatchGrid[point].IsSelectable = false;
-				foreach (TileType tt in validTileTypesForSelection)
+				//ignore if already selected
+				if (!myMatchGrid[point].IsSelected)
 				{
-					if (myMatchGrid[point].TileType == tt && !myMatchGrid[point].IsSelected)
+					foreach (TileType tt in validTileTypesForSelection)
 					{
-						myMatchGrid[point].IsSelectable = true;
+						if (myMatchGrid[point].TileType == tt)
+						{
+							//if (stackedLimit >= 0)
+							//{
+							//	//check the limit
+							//	if(myMatchGrid[point].StackValue <= stackedLimit)
+							//	{
+							//		myMatchGrid[point].IsSelectable = true;
+							//	}
+							//}
+							//else
+							//{
+								myMatchGrid[point].IsSelectable = true;
+							//}
+						}
 					}
 				}
 			}
@@ -357,6 +386,7 @@ namespace DuckDuckBoom.GunRunner.Game
 		void CombineTiles(MyMatchCell cell1, MyMatchCell cell2, MyMatchCell lastCell)
 		{
 			//Debug.Log("  Combining " + cell1.TileType + " and " + cell2.TileType);
+			int moneyStart = money;
 			if(cell1.TileType == TileType.Money)
 			{
 				if(cell2.TileType == TileType.Gun)
@@ -369,6 +399,11 @@ namespace DuckDuckBoom.GunRunner.Game
 					cell2.StackValue = 0;
 
 					myAudio.PlayOneShot(soundSet.combineBuyGuns.RandomItem(), 1.0f);
+					debugText.text = "Money with Gun: \n   buyCost        $" + buyCost +
+																"\n   qty             " + qty +
+																"\n   cost           $" + (buyCost * qty) +
+																"\n   money start    $" + moneyStart +
+																"\n   money now      $" + money;
 				}
 				else if (cell2.TileType == TileType.Fuel)
 				{
@@ -380,6 +415,11 @@ namespace DuckDuckBoom.GunRunner.Game
 					cell2.StackValue = 0;
 
 					myAudio.PlayOneShot(soundSet.combineBuyFuel.RandomItem(), 1.0f);
+					debugText.text = "Money with Fuel:\n   buyCost        $" + buyCost +
+																"\n   qty             " + qty +
+																"\n   cost           $" + (buyCost * qty) +
+																"\n   money start    $" + moneyStart +
+																"\n   money now      $" + money;
 				}
 			}
 			else if (cell1.TileType == TileType.Gun)
@@ -390,13 +430,18 @@ namespace DuckDuckBoom.GunRunner.Game
 					int qty = cell1.StackValue * cell2.StackValue;
 					int armySize = qty; //cell2.StackValue;
 					guns -= qty;
-					money += buyCost * qty;
+					money = money + buyCost * qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
 					lastCell.TileType = TileType.Army1;
 					lastCell.StackValue = armySize;
 
 					myAudio.PlayOneShot(soundSet.combineSell.RandomItem(), 1.0f);
+					debugText.text = "Gun with Army:  \n   buyCost        $" + buyCost +
+																"\n   qty             " + qty +
+																"\n   sell value     $" + (buyCost * qty) +
+																"\n   money start    $" + moneyStart +
+																"\n   money now      $" + money;
 				}
 				else if (cell2.TileType == TileType.Army2)
 				{
@@ -404,13 +449,18 @@ namespace DuckDuckBoom.GunRunner.Game
 					int qty = cell1.StackValue * cell2.StackValue;
 					int armySize = qty; // cell2.StackValue;
 					guns -= qty;
-					money += buyCost * qty;
+					money = money + buyCost * qty;
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
 					lastCell.TileType = TileType.Army2;
 					lastCell.StackValue = armySize;
 
 					myAudio.PlayOneShot(soundSet.combineSell.RandomItem(), 1.0f);
+					debugText.text = "Gun with Army:  \n   buyCost        $" + buyCost +
+																"\n   qty             " + qty +
+																"\n   sell value     $" + (buyCost * qty) +
+																"\n   money start    $" + moneyStart +
+																"\n   money now      $" + money;
 				}
 			}
 			else if (cell1.TileType == TileType.Army1)
@@ -423,28 +473,38 @@ namespace DuckDuckBoom.GunRunner.Game
 					if (redArmy > blueArmy)
 					{
 						//red wins, blue is overwhelmed losing its troops and red converts troops into power
-						int delta = redArmy - blueArmy;
 						bluePower = bluePower - blueArmy;
-						redPower = redPower - blueArmy + delta;
+						redPower = redPower + redArmy - blueArmy;
 
 						myAudio.PlayOneShot(soundSet.combineFight.RandomItem(), 1.0f);
+						debugText.text = "Red beats Blue:  \n   redArmy        " + redArmy +
+																	 "\n   blueArmy       " + blueArmy +
+																	 "\n   blue loss      " + blueArmy +
+																	 "\n   red gain       " + (redArmy - blueArmy);
 					}
 					else if (cell1.StackValue < cell2.StackValue)
 					{
 						//blue wins, red is overwhelmed losing its troops
-						int delta = blueArmy - redArmy;
-						bluePower = bluePower - redArmy + delta;
+						bluePower = bluePower + blueArmy - redArmy;
 						redPower = redPower - redArmy;
 
 						myAudio.PlayOneShot(soundSet.combineFight.RandomItem(), 1.0f);
+						debugText.text = "Blue beats Red:  \n   redArmy        " + redArmy +
+																	 "\n   blueArmy       " + blueArmy +
+																	 "\n   blue gain      " + (blueArmy - redArmy) +
+																	 "\n   red loss       " + redArmy;
 					}
 					else
 					{
 						//its a tie
-						bluePower -= cell1.StackValue;
-						redPower -= cell2.StackValue;
+						bluePower = bluePower - blueArmy;
+						redPower = redPower - redArmy;
 
 						myAudio.PlayOneShot(soundSet.combineFight.RandomItem(), 1.0f);
+						debugText.text = "Army Even Fight: \n   redArmy        " + redArmy +
+																	 "\n   blueArmy       " + blueArmy +
+																	 "\n   blue loss      " + blueArmy +
+																	 "\n   red loss       " + redArmy;
 					}
 					cell1.StackValue = 0;
 					cell2.StackValue = 0;
