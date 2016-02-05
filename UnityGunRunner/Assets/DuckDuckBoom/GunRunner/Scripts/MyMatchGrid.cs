@@ -161,16 +161,24 @@ namespace DuckDuckBoom.GunRunner.Game
 
 		void DetermineValidTileTypesForMatching()
 		{
-			HashSet<TileType> validTileTypesForSelection = new HashSet<TileType>();
-			validTileTypesForSelection.Add(TileType.Money);
-			validTileTypesForSelection.Add(TileType.Gun);
-			validTileTypesForSelection.Add(TileType.Fuel);
-			validTileTypesForSelection.Add(TileType.Army1);
-			validTileTypesForSelection.Add(TileType.Army2);
+			//HashSet<TileType> validTileTypesForSelection = new HashSet<TileType>();
+			//validTileTypesForSelection.Add(TileType.Money);
+			//validTileTypesForSelection.Add(TileType.Gun);
+			//validTileTypesForSelection.Add(TileType.Fuel);
+			//validTileTypesForSelection.Add(TileType.Army1);
+			//validTileTypesForSelection.Add(TileType.Army2);
 			//validTileTypesForSelection.Add(TileType.Obstacle);
-			HashSet<TileType> tileTypesRequireInventoryCheck = new HashSet<TileType>();
 
 			//int stackedLimit = -1; //for valid cell check later, -1 is no limit, like when stacking
+
+			//dictionary for first tile to combine with this
+			Dictionary<TileType, int> tileTypeMatch = new Dictionary<TileType, int>();
+			tileTypeMatch.Add(TileType.Money, -1);
+			tileTypeMatch.Add(TileType.Gun, -1);
+			tileTypeMatch.Add(TileType.Fuel, -1);
+			tileTypeMatch.Add(TileType.Army1, -1);
+			tileTypeMatch.Add(TileType.Army2, -1);
+			//-1 is no limit, 0 is nothing can combine and > 0 is can combine if under this number
 
 			if(selectedSet.Count == 0)
 			{
@@ -183,29 +191,39 @@ namespace DuckDuckBoom.GunRunner.Game
 				switch (selectedTileTypes.ElementAt(0))
 				{
 					case TileType.Money:
-						validTileTypesForSelection.Remove(TileType.Army1);
-						validTileTypesForSelection.Remove(TileType.Army2);
-						//stackedLimit = money / buyCost / firstStack;
+						tileTypeMatch[TileType.Money] = -1; //no limit, stack
+						tileTypeMatch[TileType.Gun] = money / buyCost / firstStack;
+						tileTypeMatch[TileType.Fuel] = money / buyCost / firstStack;
+						tileTypeMatch[TileType.Army1] = 0; //can't combine
+						tileTypeMatch[TileType.Army2] = 0; //can't combine
 						break;
 					case TileType.Gun:
-						validTileTypesForSelection.Remove(TileType.Fuel);
-						//stackedLimit = guns / firstStack;
+						tileTypeMatch[TileType.Money] = money / buyCost / firstStack;
+						tileTypeMatch[TileType.Gun] = -1; //no limit, stack
+						tileTypeMatch[TileType.Fuel] = 0; //can't combine
+						tileTypeMatch[TileType.Army1] = guns / firstStack;
+						tileTypeMatch[TileType.Army2] = guns / firstStack;
 						break;
 					case TileType.Fuel:
-						validTileTypesForSelection.Remove(TileType.Gun);
-						validTileTypesForSelection.Remove(TileType.Army1);
-						validTileTypesForSelection.Remove(TileType.Army2);
-						//stackedLimit = fuel / firstStack;
+						tileTypeMatch[TileType.Money] = money / buyCost / firstStack;
+						tileTypeMatch[TileType.Gun] = 0; //can't combine
+						tileTypeMatch[TileType.Fuel] = -1; //no limit, stack
+						tileTypeMatch[TileType.Army1] = 0; //can't combine
+						tileTypeMatch[TileType.Army2] = 0; //can't combine
 						break;
 					case TileType.Army1:
-						validTileTypesForSelection.Remove(TileType.Money);
-						validTileTypesForSelection.Remove(TileType.Fuel);
-						//stackedLimit = money / buyCost / firstStack; //only applies if matching with guns
+						tileTypeMatch[TileType.Money] = 0; //can't combine
+						tileTypeMatch[TileType.Gun] = guns / firstStack; 
+						tileTypeMatch[TileType.Fuel] = 0;
+						tileTypeMatch[TileType.Army1] = -1; //no limit, stack
+						tileTypeMatch[TileType.Army2] = -1; //no limit, fight
 						break;
 					case TileType.Army2:
-						validTileTypesForSelection.Remove(TileType.Money);
-						validTileTypesForSelection.Remove(TileType.Fuel);
-						//stackedLimit = money / buyCost / firstStack; //only applies if matching with guns
+						tileTypeMatch[TileType.Money] = 0; //can't combine
+						tileTypeMatch[TileType.Gun] = guns / firstStack;
+						tileTypeMatch[TileType.Fuel] = 0;
+						tileTypeMatch[TileType.Army1] = -1; //no limit, fight
+						tileTypeMatch[TileType.Army2] = -1; //no limit, stack
 						break;
 					default:
 						throw new ArgumentOutOfRangeException("tileType");
@@ -217,14 +235,23 @@ namespace DuckDuckBoom.GunRunner.Game
 			{
 				if(selectedTileTypes.Count == 1)
 				{
-					//can only select the current type
-					validTileTypesForSelection.Clear();
-					validTileTypesForSelection.Add(selectedTileTypes.ElementAt(0));
+					//can only select the current type, set all to 0 can't combine, then the one we are to this type
+					tileTypeMatch[TileType.Money] = 0;
+					tileTypeMatch[TileType.Gun] = 0;
+					tileTypeMatch[TileType.Fuel] = 0;
+					tileTypeMatch[TileType.Army1] = 0;
+					tileTypeMatch[TileType.Army2] = 0;
+
+					tileTypeMatch[selectedTileTypes.ElementAt(0)] = -1;
 				}
 				if (selectedTileTypes.Count >= 2)
 				{
 					//can only merge two tiles of different types, so move is over
-					validTileTypesForSelection.Clear();
+					tileTypeMatch[TileType.Money] = 0;
+					tileTypeMatch[TileType.Gun] = 0;
+					tileTypeMatch[TileType.Fuel] = 0;
+					tileTypeMatch[TileType.Army1] = 0;
+					tileTypeMatch[TileType.Army2] = 0;
 				}
 			}
 			
@@ -236,24 +263,32 @@ namespace DuckDuckBoom.GunRunner.Game
 				//ignore if already selected
 				if (!myMatchGrid[point].IsSelected)
 				{
-					foreach (TileType tt in validTileTypesForSelection)
+					if(tileTypeMatch[myMatchGrid[point].TileType] < 0)
 					{
-						if (myMatchGrid[point].TileType == tt)
-						{
-							//if (stackedLimit >= 0)
-							//{
-							//	//check the limit
-							//	if(myMatchGrid[point].StackValue <= stackedLimit)
-							//	{
-							//		myMatchGrid[point].IsSelectable = true;
-							//	}
-							//}
-							//else
-							//{
-								myMatchGrid[point].IsSelectable = true;
-							//}
-						}
+						myMatchGrid[point].IsSelectable = true;
 					}
+					else if(tileTypeMatch[myMatchGrid[point].TileType] >= myMatchGrid[point].StackValue)
+					{
+						myMatchGrid[point].IsSelectable = true;
+					}
+					//foreach (TileType tt in validTileTypesForSelection)
+					//{
+					//	if (myMatchGrid[point].TileType == tt)
+					//	{
+					//		//if (stackedLimit >= 0)
+					//		//{
+					//		//	//check the limit
+					//		//	if(myMatchGrid[point].StackValue <= stackedLimit)
+					//		//	{
+					//		//		myMatchGrid[point].IsSelectable = true;
+					//		//	}
+					//		//}
+					//		//else
+					//		//{
+					//			myMatchGrid[point].IsSelectable = true;
+					//		//}
+					//	}
+					//}
 				}
 			}
 		}
